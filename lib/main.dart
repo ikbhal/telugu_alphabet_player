@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'alphabets.dart'
+import 'alphabets.dart';
+import 'dart:math';
 
 void main() {
   runApp(TeluguAlphabetPlayer());
@@ -26,18 +27,18 @@ class AlphabetPlayerScreen extends StatefulWidget {
 
 class _AlphabetPlayerScreenState extends State<AlphabetPlayerScreen> {
   final FlutterTts flutterTts = FlutterTts();
-  String currentAlphabet ='';
-  bool isPlaying =false;
-  int repeatCount=10;
+  String currentAlphabet = '';
+  bool isPlaying = false;
+  int repeatCount = 10;
 
   List<String> alphabets = Alphabets.alphabets;
 
   List<DropdownMenuItem<String>> getAlphabetDropdownItems() {
     return alphabets
         .map((alphabet) => DropdownMenuItem<String>(
-              value: alphabet,
-              child: Text(alphabet),
-            ))
+      value: alphabet,
+      child: Text(alphabet),
+    ))
         .toList();
   }
 
@@ -54,7 +55,6 @@ class _AlphabetPlayerScreenState extends State<AlphabetPlayerScreen> {
   @override
   void initState() {
     super.initState();
-   
     isPlaying = false;
     currentAlphabet = '';
     repeatCount = 1;
@@ -98,11 +98,49 @@ class _AlphabetPlayerScreenState extends State<AlphabetPlayerScreen> {
     });
   }
 
+  void showHelpDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Help'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('1. Select Start Alphabet.'),
+              Text('2. Select End Alphabet.'),
+              Text('3. Select Repeat Count.'),
+              Text('4. Click Play Button to Play.'),
+              Text('5. Click Stop button to stop'),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Telugu Alphabet Player'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              showHelpDialog(context);
+            },
+            icon: Icon(Icons.help),
+          ),
+        ],
       ),
       body: Center(
         child: Column(
@@ -117,6 +155,7 @@ class _AlphabetPlayerScreenState extends State<AlphabetPlayerScreen> {
                   alphabets.insert(0, selectedAlphabet!);
                 });
               },
+              hint: Text('Start Alphabet'),
             ),
             DropdownButton<String>(
               value: alphabets.isNotEmpty ? alphabets.last : null,
@@ -127,6 +166,7 @@ class _AlphabetPlayerScreenState extends State<AlphabetPlayerScreen> {
                   alphabets.insert(0, selectedAlphabet!);
                 });
               },
+              hint: Text('End Alphabet'),
             ),
             DropdownButton<int>(
               value: repeatCount,
@@ -136,11 +176,15 @@ class _AlphabetPlayerScreenState extends State<AlphabetPlayerScreen> {
                   repeatCount = selectedCount!;
                 });
               },
+              hint: Text('Repeat Count'),
             ),
             SizedBox(height: 20),
             Text(
-              'Current Alphabet: $currentAlphabet',
-              style: TextStyle(fontSize: 20),
+              '$currentAlphabet',
+              style: TextStyle(
+                  fontSize: 100,
+                  color: Colors.primaries[Random().nextInt(Colors.primaries.length)]
+              ),
             ),
             SizedBox(height: 20),
             Row(
@@ -149,6 +193,13 @@ class _AlphabetPlayerScreenState extends State<AlphabetPlayerScreen> {
                 ElevatedButton(
                   onPressed: isPlaying ? pauseAlphabets : playAlphabets,
                   child: Text(isPlaying ? 'Pause' : 'Play'),
+                ),
+                SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    pauseAlphabets();
+                  },
+                  child: Text('Stop'),
                 ),
               ],
             ),
